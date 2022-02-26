@@ -18,9 +18,12 @@ enum MessageType {
 }
 
 class StateTest {
-    private final Reducer<Integer, MessageType> reducer = (value, message) -> switch (message) {
-        case Add -> value + 1;
-        case Subtract -> value - 1;
+    private final Reducer<Integer, MessageType> reducer = (value, message) -> {
+        switch (message) {
+            case Add: return Integer.valueOf(value + 1);
+            case Subtract: return Integer.valueOf(value - 1);
+            default: return value;
+        }
     };
     private final State<Integer, MessageType> state = State.constructor().create(reducer, 5);
 
