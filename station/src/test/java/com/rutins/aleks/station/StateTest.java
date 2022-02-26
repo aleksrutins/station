@@ -2,6 +2,7 @@ package com.rutins.aleks.station;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -56,5 +57,28 @@ class StateTest {
         assertEquals(true, observed.get());
         assertEquals(5, oldValue.get());
         assertEquals(4, newValue.get());
+    }
+
+    @Test
+    void canThread() throws InterruptedException {
+        var stateCopy = state;
+        var latch = new CountDownLatch(2);
+        var thread1 = new Thread(() -> {
+            stateCopy.mutate(MessageType.Add);
+            stateCopy.get();
+            stateCopy.mutate(MessageType.Subtract);
+            stateCopy.get();
+            latch.countDown();
+        });
+        var thread2 = new Thread(() -> {
+            stateCopy.mutate(MessageType.Add);
+            stateCopy.get();
+            stateCopy.mutate(MessageType.Subtract);
+            stateCopy.get();
+            latch.countDown();
+        });
+        thread1.start();
+        thread2.start();
+        latch.await();
     }
 }
