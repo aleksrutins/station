@@ -31,17 +31,17 @@ class StateTest {
     }
 
     @Test
-    void canMutate() {
+    void canMutate() throws InterruptedException {
         var stateCopy = state;
         assertEquals(5, stateCopy.get());
-        stateCopy.mutate(MessageType.Add);
+        stateCopy.mutate(MessageType.Add).await();
         assertEquals(6, stateCopy.get());
-        stateCopy.mutate(MessageType.Subtract);
+        stateCopy.mutate(MessageType.Subtract).await();
         assertEquals(5, stateCopy.get());
     }
 
     @Test
-    void canObserve() {
+    void canObserve() throws InterruptedException {
         var stateCopy = state;
         var observed = new AtomicBoolean(false);
         var oldValue = new AtomicInteger();
@@ -53,7 +53,7 @@ class StateTest {
             oldValue.set(oldValueObserved);
             newValue.set(value);
         });
-        stateCopy.mutate(MessageType.Subtract);
+        stateCopy.mutate(MessageType.Subtract).await();
         assertEquals(true, observed.get());
         assertEquals(5, oldValue.get());
         assertEquals(4, newValue.get());

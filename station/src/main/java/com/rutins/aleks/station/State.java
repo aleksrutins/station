@@ -2,6 +2,7 @@ package com.rutins.aleks.station;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.function.Function;
 
 import javax.lang.model.type.NullType;
@@ -38,12 +39,17 @@ public class State<T, Msg> {
         return new StateConstructor(new ArrayList<>());
     }
 
-    public synchronized void mutate(Msg message) {
+    public synchronized CountDownLatch mutate(Msg message) {
         final var oldValue = value;
         value = reducer.apply(value, message);
+        var latch = new CountDownLatch(observers.size());
         for (Observer<T> observer : observers) {
-            observer.react(oldValue, value);
+            new Thread(() -> {
+                observer.react(oldValue, value);
+                latch.countDown();
+            }).start();
         }
+        return latch;
     }
 
     public <U extends Utility<T>> U getUtility(Class<U> type) {

@@ -74,7 +74,7 @@ state.get(); // 5
 ```
 
 ### Observers
-You can also observe state for changes using observers, which are lambdas or functional objects implementing `com.rutins.aleks.station.callbacks.Observer`. An observer takes two parameters, the previous value and the value after the mutation. Attach them using `State#observe()`.
+You can also observe state for changes using observers, which are lambdas or functional objects implementing `com.rutins.aleks.station.callbacks.Observer`. An observer takes two parameters, the previous value and the value after the mutation. Attach them using `State#observe()`. `mutate()` will call the observers each in their own thread, and return a `CountDownLatch` that finishes after all observers have finished executing. You should call `.await()` on this if you want to make sure that all observers have executed.
 ```java
 Observer<Integer> observer = (oldValue, newValue) -> {
     System.out.println("Old value: " + oldValue + ", new value: " + newValue);
@@ -82,5 +82,5 @@ Observer<Integer> observer = (oldValue, newValue) -> {
 
 state.observe(observer);
 
-state.mutate(Message.Increment); // Prints: "Old value: 5, new value: 6"
+state.mutate(Message.Increment).await(); // Prints: "Old value: 5, new value: 6"
 ```
