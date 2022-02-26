@@ -18,13 +18,18 @@ group = 'com.rutins.aleks'
 
 publishing {
     publications {
-        library(MavenPublication) {
+        gpr(MavenPublication) {
             from components.java
         }
     }
     repositories {
         maven {
-            url = uri("${buildDir}/publishing-repository")
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/aleksrutins/station")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+            }
         }
     }
 }
