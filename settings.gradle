@@ -8,4 +8,4 @@
  */
 
 rootProject.name = 'station'
-include('lib')
+include('station')
