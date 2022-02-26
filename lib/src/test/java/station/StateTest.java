@@ -17,22 +17,6 @@ enum MessageType {
     Subtract
 }
 
-class TestUtility<V> implements Utility<V> {
-
-    public void run(V value) {
-        assertNotNull(value);
-        assertInstanceOf(Integer.class, value);
-        assertEquals(6, value);
-    }
-
-    public UtilityTrigger[] triggers() {
-        return new UtilityTrigger[] {
-            UtilityTrigger.OBSERVE
-        };
-    }
-
-}
-
 class StateTest {
     private final Reducer<Integer, MessageType> reducer = (value, message) -> switch (message) {
         case Add -> value + 1;

@@ -2,27 +2,28 @@ package station;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import station.callbacks.Reducer;
 
 public class StateConstructor {
-    private final List<Supplier<? extends Utility<?>>> utilities;
+    private final List<Function<State<?, ?>, ? extends Utility<?>>> utilities;
 
-    protected StateConstructor(List<Supplier<? extends Utility<?>>> initUtilities) {
+    protected StateConstructor(List<Function<State<?, ?>, ? extends Utility<?>>> initUtilities) {
         utilities = initUtilities;
     }
 
-    public <T extends Utility<?>> StateConstructor use(Supplier<T> utility) {
+    public <T extends Utility<?>> StateConstructor use(Function<State<?, ?>, T> utility) {
         var utilitiesCopy = utilities;
         utilitiesCopy.add(utility);
         return new StateConstructor(utilitiesCopy);
     }
 
     public <T extends Utility<?>> StateConstructor use(Class<T> utility) {
-        return use(() -> {
+        return use(state -> {
             try {
-                return utility.getDeclaredConstructor().newInstance();
+                return utility.getDeclaredConstructor(State.class).newInstance(state);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
                     | InvocationTargetException | NoSuchMethodException | SecurityException e) {
                 // TODO Auto-generated catch block

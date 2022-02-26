@@ -1,10 +1,10 @@
 package station;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
+
+import javax.lang.model.type.NullType;
 
 import station.callbacks.Observer;
 import station.callbacks.Reducer;
@@ -16,13 +16,13 @@ public class State<T, Msg> {
 
     private List<Utility<T>> instanceUtilities = new ArrayList<>();
 
-    protected State(Reducer<T, Msg> reducer, T initialValue, List<Supplier<? extends Utility<?>>> utilities) {
+    protected State(Reducer<T, Msg> reducer, T initialValue, List<Function<State<?, ?>, ? extends Utility<?>>> utilities) {
         value = initialValue;
         this.reducer = reducer;
         observers = new ArrayList<>();
         for (var utility : utilities) {
             try {
-                instanceUtilities.add((Utility<T>)utility.get());
+                instanceUtilities.add((Utility<T>)utility.apply(this));
             } catch (IllegalArgumentException | SecurityException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -44,22 +44,27 @@ public class State<T, Msg> {
         for (Observer<T> observer : observers) {
             observer.react(oldValue, value);
         }
-        for (Utility<T> utility : instanceUtilities) {
-            if(Arrays.asList(utility.triggers()).contains(UtilityTrigger.OBSERVE)) {
-                utility.run(value);
-            }
-        }
     }
 
-    public void run(String trigger) {
+    public <U extends Utility<T>> U getUtility(Class<U> type) {
         for (Utility<T> utility : instanceUtilities) {
-            if(Arrays.asList(utility.triggers()).contains(UtilityTrigger.MANUAL) && utility.getClass().getName() == trigger) {
-                utility.run(value);
+            if(type.equals(utility.getClass())) {
+                return (U) utility;
             }
         }
+        return null;
     }
 
     public T get() {
         return value;
+    }
+
+    @SafeVarargs
+    public static <T, U extends Utility<? super T>> State<T, NullType> immutable(T value, Class<U>...utilities) {
+        var constructor = constructor();
+        for (var utility : utilities) {
+            constructor = constructor.use(utility);
+        }
+        return constructor.create((val, msg) -> val, value);
     }
 }

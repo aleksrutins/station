@@ -5,29 +5,27 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.function.Consumer;
 
+import station.State;
 import station.Utility;
 import station.UtilityTrigger;
 
-public class Persist implements Utility<Object> {
+public class Persist<T> implements Utility<T> {
     
-    private Consumer<Object> fn;
+    private State<T, ?> stateRef;
     
-    public static Consumer<Object> ToFile(String name) {
-        return obj -> {
-            try (var fileOut = new FileOutputStream(name)) {
-                var objOut = new ObjectOutputStream(fileOut);
-                objOut.writeObject(obj);
-                objOut.close();
-                fileOut.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        };
+    public void writeToFile(String name) {
+        try (var fileOut = new FileOutputStream(name)) {
+            var objOut = new ObjectOutputStream(fileOut);
+            objOut.writeObject(stateRef.get());
+            objOut.close();
+            fileOut.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    public static <T> T getFromFile(String name) throws ClassNotFoundException, IOException {
+    public static <T> T readFromFile(String name) throws ClassNotFoundException, IOException {
         T val = null;
         var fileIn = new FileInputStream(name);
         var objIn = new ObjectInputStream(fileIn);
@@ -37,12 +35,8 @@ public class Persist implements Utility<Object> {
         return val;
     }
 
-    public Persist(Consumer<Object> persistFn) {
-        fn = persistFn;
-    }
-
-    public void run(Object value) {
-        fn.accept(value);
+    public Persist(State<T, ?> state) {
+        stateRef = state;
     }
 
     public UtilityTrigger[] triggers() {
