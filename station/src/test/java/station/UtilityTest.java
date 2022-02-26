@@ -25,9 +25,12 @@ class TestUtility<V> implements Utility<V> {
 }
 
 class UtilityTest {
-    private final Reducer<Integer, MessageType> reducer = (value, message) -> switch (message) {
-        case Add -> value + 1;
-        case Subtract -> value - 1;
+    private final Reducer<Integer, MessageType> reducer = (value, message) -> {
+        switch (message) {
+            case Add: return Integer.valueOf(value + 1);
+            case Subtract: return Integer.valueOf(value - 1);
+            default: return value;
+        }
     };
     @Test
     void canUseUtilities() {
