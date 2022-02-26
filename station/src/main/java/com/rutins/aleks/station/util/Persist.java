@@ -44,5 +44,4 @@ public class Persist<T> implements Utility<T> {
             UtilityTrigger.MANUAL
         };
     }
-    
 }

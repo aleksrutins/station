@@ -38,7 +38,7 @@ public class State<T, Msg> {
         return new StateConstructor(new ArrayList<>());
     }
 
-    public void mutate(Msg message) {
+    public synchronized void mutate(Msg message) {
         final var oldValue = value;
         value = reducer.apply(value, message);
         for (Observer<T> observer : observers) {
@@ -55,7 +55,7 @@ public class State<T, Msg> {
         return null;
     }
 
-    public T get() {
+    public synchronized T get() {
         return value;
     }
 
