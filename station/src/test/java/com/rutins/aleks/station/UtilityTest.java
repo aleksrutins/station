@@ -10,6 +10,10 @@ import org.junit.jupiter.api.Test;
 
 class TestUtility<V> implements Utility<V> {
 
+    public TestUtility(State<?, ?> state) {
+
+    }
+
     public void run(V value) {
         assertNotNull(value);
         assertInstanceOf(Integer.class, value);
@@ -42,7 +46,7 @@ class UtilityTest {
         assertEquals(6, localState.get());
 
         localState = State.constructor()
-                    .use(state -> new TestUtility<Integer>())
+                    .use(state -> new TestUtility<Integer>(state))
                     .create(reducer, 5);
         assertEquals(5, localState.get());
         localState.mutate(MessageType.Add);
