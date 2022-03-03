@@ -11,7 +11,7 @@ import com.rutins.aleks.station.callbacks.Observer;
 import com.rutins.aleks.station.callbacks.Reducer;
 
 public class State<T, Msg> {
-    private T value;
+    private volatile T value;
     private Reducer<T, Msg> reducer;
     private List<Observer<T>> observers;
 
